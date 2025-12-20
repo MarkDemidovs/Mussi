@@ -1,10 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { openDB } from "idb";
+
+const DB_NAME = "local-music";
+const STORE_NAME = "songs";
 
 export default function App() {
-  const [songList, setSongList] = useState<File[]>([]);
+  const [songList, setSongList] = useState<{ name: string; file: File }[]>([]);
 
-  const handleImport = (files: FileList) => {
-    setSongList(prev => [...prev, ...Array.from(files)]);
+  useEffect(() => {
+    (async () => {
+      const db = await openDB(DB_NAME, 1, {
+        upgrade(db) {
+          db.createObjectStore(STORE_NAME, { keyPath: "name" });
+        },
+      });
+      const allSongs = await db.getAll(STORE_NAME);
+      setSongList(allSongs.map(s => ({ name: s.name, file: s.file })));
+    })();
+  }, []);
+
+  const handleImport = async (files: FileList) => {
+    const db = await openDB(DB_NAME, 1);
+    const fileArray = Array.from(files);
+
+    for (const file of fileArray) {
+      await db.put(STORE_NAME, { name: file.name, file });
+    }
+
+    setSongList(prev => [...prev, ...fileArray.map(f => ({ name: f.name, file: f }))]);
   };
 
   return (
@@ -25,7 +48,7 @@ export default function App() {
         {songList.map((song, index) => (
           <div key={index}>
             <p>{song.name}</p>
-            <audio controls src={URL.createObjectURL(song)} />
+            <audio controls src={URL.createObjectURL(song.file)} />
           </div>
         ))}
       </div>
