@@ -47,9 +47,8 @@ export default function App() {
 
       <div>
         {songList.map((song, index) => (
-          <div key={index}>
-            <p>{song.name.slice(0, -4)}</p>
-            <audio controls src={URL.createObjectURL(song.file)} />
+          <div key={index} id="audioFile">
+            <Song label={song.name.slice(0, -4)} audio={URL.createObjectURL(song.file)}/>
           </div>
         ))}
       </div>

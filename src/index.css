@@ -1,3 +1,19 @@
 #audioInput {
     display:block;
 }
+
+#songTitle {
+    display: inline;
+    vertical-align:middle;
+}
+
+#audioFile {
+    border: 1px solid rgba(150, 150, 150, 0.192);
+    border-radius: 10px;
+}
+
+#seperateSong {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
