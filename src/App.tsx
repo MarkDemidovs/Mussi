@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { openDB } from "idb";
+import Song from "./components/Song";
 
 const DB_NAME = "local-music";
 const STORE_NAME = "songs";
@@ -47,7 +48,7 @@ export default function App() {
       <div>
         {songList.map((song, index) => (
           <div key={index}>
-            <p>{song.name}</p>
+            <p>{song.name.slice(0, -4)}</p>
             <audio controls src={URL.createObjectURL(song.file)} />
           </div>
         ))}
