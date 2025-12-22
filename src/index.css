@@ -1,10 +1,10 @@
 #audioInput {
-    display:block;
+    display: block;
 }
 
 #songTitle {
     display: inline;
-    vertical-align:middle;
+    vertical-align: middle;
 }
 
 #audioFile {
@@ -16,4 +16,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+#playBar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: #161618;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
 }

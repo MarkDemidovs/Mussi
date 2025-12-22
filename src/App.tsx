@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { openDB } from "idb";
 import Song from "./components/Song";
+import PlayBar from "./components/PlayBar";
 
 const DB_NAME = "local-music";
 const STORE_NAME = "songs";
 
 export default function App() {
   const [songList, setSongList] = useState<{ name: string; file: File }[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -18,6 +21,25 @@ export default function App() {
       const allSongs = await db.getAll(STORE_NAME);
       setSongList(allSongs.map(s => ({ name: s.name, file: s.file })));
     })();
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onEnded = () => setIsPlaying(false);
+
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("ended", onEnded);
+
+    return () => {
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("ended", onEnded);
+    };
   }, []);
 
   const handleImport = async (files: FileList) => {
@@ -32,26 +54,29 @@ export default function App() {
   };
 
   return (
-    <div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const files = (e.target as HTMLFormElement).audioInput.files;
-          if (files) handleImport(files);
-        }}
-      >
-        <label htmlFor="audioInput">Select MP3, OGG, or WAV files:</label>
-        <input type="file" id="audioInput" name="audioInput" accept="audio/*" multiple />
-        <button type="submit">Import</button>
-      </form>
-
+    <>
       <div>
-        {songList.map((song, index) => (
-          <div key={index} id="audioFile">
-            <Song label={song.name.slice(0, -4)} audio={URL.createObjectURL(song.file)}/>
-          </div>
-        ))}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const files = (e.target as HTMLFormElement).audioInput.files;
+            if (files) handleImport(files);
+          }}
+        >
+          <label htmlFor="audioInput">Select MP3, OGG, or WAV files:</label>
+          <input type="file" id="audioInput" name="audioInput" accept="audio/*" multiple />
+          <button type="submit">Import</button>
+        </form>
+
+        <div>
+          {songList.map((song, index) => (
+            <div key={index} id="audioFile">
+              <Song label={song.name.slice(0, -4)} audio={URL.createObjectURL(song.file)} />
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+      <PlayBar songName="今回は何もwww"/>
+    </>
   );
 }
