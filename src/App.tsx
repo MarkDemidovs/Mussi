@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { openDB } from "idb";
 import Song from "./components/Song";
 import PlayBar from "./components/PlayBar";
@@ -8,8 +8,7 @@ const STORE_NAME = "songs";
 
 export default function App() {
   const [songList, setSongList] = useState<{ name: string; file: File }[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentSong, setCurrentSong] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -21,25 +20,6 @@ export default function App() {
       const allSongs = await db.getAll(STORE_NAME);
       setSongList(allSongs.map(s => ({ name: s.name, file: s.file })));
     })();
-  }, []);
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const onPlay = () => setIsPlaying(true);
-    const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
-
-    audio.addEventListener("play", onPlay);
-    audio.addEventListener("pause", onPause);
-    audio.addEventListener("ended", onEnded);
-
-    return () => {
-      audio.removeEventListener("play", onPlay);
-      audio.removeEventListener("pause", onPause);
-      audio.removeEventListener("ended", onEnded);
-    };
   }, []);
 
   const handleImport = async (files: FileList) => {
@@ -71,12 +51,17 @@ export default function App() {
         <div>
           {songList.map((song, index) => (
             <div key={index} id="audioFile">
-              <Song label={song.name.slice(0, -4)} audio={URL.createObjectURL(song.file)} />
+              <Song
+                label={song.name.slice(0, -4)}
+                audio={URL.createObjectURL(song.file)}
+                onPlay={(name: string) => setCurrentSong(name)}
+              />
+
             </div>
           ))}
         </div>
       </div>
-      <PlayBar songName="今回は何もwww"/>
+      <PlayBar songName={currentSong} />
     </>
   );
 }
