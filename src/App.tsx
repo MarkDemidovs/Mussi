@@ -33,6 +33,14 @@ export default function App() {
     setSongList(prev => [...prev, ...fileArray.map(f => ({ name: f.name, file: f }))]);
   };
 
+  const deleteAudio = async (audioName: string) => {
+    const db = await openDB(DB_NAME, 1);
+    await db.delete(STORE_NAME, audioName);
+    setSongList(prev => prev.filter(song => song.name !== audioName));
+  };
+
+
+
   return (
     <>
       <div>
@@ -53,8 +61,10 @@ export default function App() {
             <div key={index} id="audioFile">
               <Song
                 label={song.name.slice(0, -4)}
+                fullName={song.name}
                 audio={URL.createObjectURL(song.file)}
                 onPlay={(name: string) => setCurrentSong(name)}
+                deleteAudio={deleteAudio}
               />
 
             </div>
